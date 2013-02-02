@@ -2,10 +2,36 @@
 
 namespace ScnHttpCache\View\Helper;
 
+use ScnHttpCache\Service\EsiApplicationConfigProviderInterface;
+use Zend\Mvc\Application;
+use Zend\Stdlib\Parameters;
+use Zend\Uri\UriFactory;
 use Zend\View\Helper\AbstractHelper;
 
 class Esi extends AbstractHelper
 {
+    /**
+     * @var EsiApplicationConfigProviderInterface
+     */
+    protected $esiApplicationConfigProvider;
+
+    public function setEsiApplicationConfigProvider(EsiApplicationConfigProviderInterface $esiApplicationConfigProvider)
+    {
+        $this->esiApplicationConfigProvider = $esiApplicationConfigProvider;
+
+        return $this;
+    }
+
+    public function getEsiApplicationConfigProvider()
+    {
+        if (!$this->esiApplicationConfigProvider instanceof EsiApplicationConfigProviderInterface) {
+            // TODO - FIX EXCEPTION
+            throw new \Exception('FIX EXCEPTION');
+        }
+
+        return $this->esiApplicationConfigProvider;
+    }
+
     /**
      * By default provides the fluent interface,
      * but can also be invoked with a variable,
@@ -24,6 +50,17 @@ class Esi extends AbstractHelper
 
     public function getTag($url)
     {
-        return "<esi:include src=\"$url\" onerror=\"continue\" />\n";
+        $uri = UriFactory::factory($url);
+
+        $applicationConfig = $this->getEsiApplicationConfigProvider()->getEsiApplicationConfig($uri);
+        $application = Application::init($applicationConfig);
+
+        $request = $application->getServiceManager()->get('Request');
+        $request->setUri($uri);
+        $request->setQuery(new Parameters($uri->getQueryAsArray()));
+
+        $application->run();
+
+//         return "<esi:include src=\"$url\" onerror=\"continue\" />\n";
     }
 }
