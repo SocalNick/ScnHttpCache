@@ -8,12 +8,23 @@ use Zend\ServiceManager\ServiceLocatorInterface;
 
 class EsiViewHelperFactory implements FactoryInterface
 {
-    public function createService(ServiceLocatorInterface $services)
+    public function createService(ServiceLocatorInterface $viewHelperPluginManager)
     {
-        $esiApplicationConfigProvider = $services->getServiceLocator()->get('ScnHttpCache-EsiApplicationConfigProviderInterface');
+        $serviceLocator = $viewHelperPluginManager->getServiceLocator();
+
+        $esiApplicationConfigProvider = $serviceLocator->get('ScnHttpCache-EsiApplicationConfigProviderInterface');
 
         $viewHelper = new Esi();
         $viewHelper->setEsiApplicationConfigProvider($esiApplicationConfigProvider);
+
+        $request = $serviceLocator->get('Request');
+        $headers = $request->getHeaders();
+        if (
+            $headers->has('surrogate-capability')
+            && false !== strpos($headers->get('surrogate-capability')->getFieldValue(), 'ESI/1.0')
+        ) {
+            $viewHelper->setSurrogateCapability(true);
+        }
 
         return $viewHelper;
     }
