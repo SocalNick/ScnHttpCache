@@ -5,10 +5,11 @@ namespace ScnHttpCache\View\Helper;
 use ScnHttpCache\Service\EsiApplicationConfigProviderInterface;
 use ScnHttpCache\View\Exception as ViewException;
 use Zend\Mvc\Application;
+use Zend\Mvc\MvcEvent;
 use Zend\Stdlib\Parameters;
+use Zend\Uri\Uri;
 use Zend\Uri\UriFactory;
 use Zend\View\Helper\AbstractHelper;
-use Zend\Mvc\MvcEvent;
 
 class Esi extends AbstractHelper
 {
@@ -21,6 +22,11 @@ class Esi extends AbstractHelper
      * @var EsiApplicationConfigProviderInterface
      */
     protected $esiApplicationConfigProvider;
+
+    /**
+     * @var Application
+     */
+    protected $application;
 
     public function setSurrogateCapability($surrogateCapability)
     {
@@ -50,6 +56,29 @@ class Esi extends AbstractHelper
         return $this->esiApplicationConfigProvider;
     }
 
+    public function setApplication(Application $application)
+    {
+        $this->application = $application;
+
+        return $this;
+    }
+
+    public function getApplication(Uri $uri)
+    {
+        if (!$this->application instanceof Application) {
+            $applicationConfig = $this->getEsiApplicationConfigProvider()->getEsiApplicationConfig($uri);
+            $this->application = Application::init($applicationConfig);
+            $this->application->getEventManager()->clearListeners(MvcEvent::EVENT_FINISH);
+        }
+
+        $request = $this->application->getRequest();
+        $request->setUri($uri);
+        $request->setRequestUri($uri->getPath() . '?' . $uri->getQuery());
+        $request->setQuery(new Parameters($uri->getQueryAsArray()));
+
+        return $this->application;
+    }
+
     /**
      * By default provides the fluent interface,
      * but can also be invoked with a variable,
@@ -60,13 +89,13 @@ class Esi extends AbstractHelper
     public function __invoke($url = null)
     {
         if (null !== $url) {
-            return $this->getTag($url);
+            return $this->doEsi($url);
         }
 
         return $this;
     }
 
-    public function getTag($url)
+    public function doEsi($url)
     {
         if ($this->getSurrogateCapability()) {
             return "<esi:include src=\"$url\" onerror=\"continue\" />\n";
@@ -74,14 +103,7 @@ class Esi extends AbstractHelper
 
         $uri = UriFactory::factory($url);
 
-        $applicationConfig = $this->getEsiApplicationConfigProvider()->getEsiApplicationConfig($uri);
-        $application = Application::init($applicationConfig);
-        $application->getEventManager()->clearListeners(MvcEvent::EVENT_FINISH);
-
-        $request = $application->getServiceManager()->get('Request');
-        $request->setUri($uri);
-        $request->setRequestUri($uri->getPath() . '?' . $uri->getQuery());
-        $request->setQuery(new Parameters($uri->getQueryAsArray()));
+        $application = $this->getApplication($uri);
 
         $response = $application->run();
 
