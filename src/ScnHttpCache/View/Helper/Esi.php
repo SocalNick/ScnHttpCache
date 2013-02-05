@@ -3,6 +3,7 @@
 namespace ScnHttpCache\View\Helper;
 
 use ScnHttpCache\Service\EsiApplicationConfigProviderInterface;
+use ScnHttpCache\View\Exception as ViewException;
 use Zend\Mvc\Application;
 use Zend\Stdlib\Parameters;
 use Zend\Uri\UriFactory;
@@ -43,8 +44,7 @@ class Esi extends AbstractHelper
     public function getEsiApplicationConfigProvider()
     {
         if (!$this->esiApplicationConfigProvider instanceof EsiApplicationConfigProviderInterface) {
-            // TODO - FIX EXCEPTION
-            throw new \Exception('FIX EXCEPTION');
+            throw new ViewException\RuntimeException('Esi View Helper expects an instance of EsiApplicationConfigProviderInterface to be injected');
         }
 
         return $this->esiApplicationConfigProvider;
