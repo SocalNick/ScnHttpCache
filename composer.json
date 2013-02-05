@@ -1,0 +1,37 @@
+{
+    "name": "socalnick/scn-http-cache",
+    "description": "Adds several features to help make ZF2 applications cacheable.",
+    "type": "library",
+    "keywords": [
+        "zf2",
+        "cache-control",
+        "esi",
+        "edge side includes",
+        "varnish"
+    ],
+    "homepage": "https://github.com/SocalNick/ScnHttpCache",
+    "authors": [
+        {
+            "name": "Nicholas Calugar",
+            "email": "njcalugar@gmail.com",
+            "homepage": "http://socalnick.github.com/"
+        }
+    ],
+    "license": "BSD-3-Clause",
+    "require": {
+        "php": ">=5.3.3",
+        "zendframework/zendframework": "2.*"
+    },
+    "require-dev": {
+        "mockery/mockery": ">=0.7.2"
+    },
+    "autoload": {
+        "psr-0": {
+            "ScnHttpCache": "src/"
+        },
+        "classmap": [
+            "src/",
+            "Module.php"
+        ]
+    }
+}
