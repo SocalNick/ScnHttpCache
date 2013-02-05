@@ -1,7 +1,7 @@
 ScnHttpCache
 ============
 
-Adds several features to help make ZF2 applications cacheable.
+A ZF2 module that helps implement standards based caching built into the HTTP spec and gateway caches.
 
 [![Build Status](https://travis-ci.org/SocalNick/ScnHttpCache.png?branch=master)](https://travis-ci.org/SocalNick/ScnHttpCache)
 
