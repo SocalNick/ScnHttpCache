@@ -28,6 +28,12 @@ class Esi extends AbstractHelper
      */
     protected $application;
 
+    /**
+     * This tells the view helper if the client understands surrogate capability
+     *
+     * @param boolean $surrogateCapability
+     * @return Esi
+     */
     public function setSurrogateCapability($surrogateCapability)
     {
         $this->surrogateCapability = (bool) $surrogateCapability;
@@ -35,11 +41,21 @@ class Esi extends AbstractHelper
         return $this;
     }
 
+    /**
+     * @return boolean
+     */
     public function getSurrogateCapability()
     {
         return $this->surrogateCapability;
     }
 
+    /**
+     * If the client does not understand surrogate capability, the config provider
+     * is needed to fetch a configuration to boostrap another application request.
+     *
+     * @param EsiApplicationConfigProviderInterface $esiApplicationConfigProvider
+     * @return Esi
+     */
     public function setEsiApplicationConfigProvider(EsiApplicationConfigProviderInterface $esiApplicationConfigProvider)
     {
         $this->esiApplicationConfigProvider = $esiApplicationConfigProvider;
@@ -47,6 +63,10 @@ class Esi extends AbstractHelper
         return $this;
     }
 
+    /**
+     * @throws ViewException\RuntimeException
+     * @return EsiApplicationConfigProviderInterface
+     */
     public function getEsiApplicationConfigProvider()
     {
         if (!$this->esiApplicationConfigProvider instanceof EsiApplicationConfigProviderInterface) {
@@ -56,6 +76,13 @@ class Esi extends AbstractHelper
         return $this->esiApplicationConfigProvider;
     }
 
+    /**
+     * This is largely here for testing purposes. In most cases,
+     * The application should be initialized in getApplication
+     *
+     * @param Application $application
+     * @return Esi
+     */
     public function setApplication(Application $application)
     {
         $this->application = $application;
@@ -63,14 +90,23 @@ class Esi extends AbstractHelper
         return $this;
     }
 
+    /**
+     * When application is not available, one will be initialized to respond to
+     * the esi request.
+     *
+     * @param Uri $uri
+     * @return \Zend\Mvc\Application
+     */
     public function getApplication(Uri $uri)
     {
         if (!$this->application instanceof Application) {
             $applicationConfig = $this->getEsiApplicationConfigProvider()->getEsiApplicationConfig($uri);
             $this->application = Application::init($applicationConfig);
+            // Remove the finish listeners so response header and content is not automatically echo'd
             $this->application->getEventManager()->clearListeners(MvcEvent::EVENT_FINISH);
         }
 
+        // The request needs to be augmented with the URI passed in
         $request = $this->application->getRequest();
         $request->setUri($uri);
         $request->setRequestUri($uri->getPath() . '?' . $uri->getQuery());
@@ -95,6 +131,13 @@ class Esi extends AbstractHelper
         return $this;
     }
 
+    /**
+     * If the client understands surrogate capability, return esi tag.
+     * Otherwise, get a new application instance and run it, returning the content.
+     *
+     * @param string $url
+     * @return string
+     */
     public function doEsi($url)
     {
         if ($this->getSurrogateCapability()) {
