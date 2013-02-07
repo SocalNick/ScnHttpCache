@@ -2,6 +2,7 @@
 
 namespace ScnHttpCache\Service;
 
+use ScnHttpCache\Service\Exception as ServiceException;
 use Zend\Uri\UriInterface;
 use Zend\ServiceManager\ServiceLocatorAwareInterface;
 use Zend\ServiceManager\ServiceLocatorInterface;
@@ -30,13 +31,13 @@ abstract class EsiApplicationConfigProviderAbstract implements
     /**
      * Get service locator
      *
+     * @throws ServiceException\RuntimeException
      * @return ServiceLocatorInterface
      */
     public function getServiceLocator()
     {
         if (!$this->serviceLocator instanceof ServiceLocatorInterface) {
-            // TODO Throw correct exception
-            throw new \Exception('FIX EXCEPTION');
+            throw new ServiceException\RuntimeException('EsiApplicationProviderAbstract expects an instance of ServiceLocatorInterface to be injected');
         }
 
         return $this->serviceLocator;
