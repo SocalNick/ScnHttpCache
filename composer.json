@@ -20,7 +20,7 @@
     "license": "BSD-3-Clause",
     "require": {
         "php": ">=5.3.9",
-        "zendframework/zendframework": "2.*"
+        "zendframework/zendframework": "2.0.*"
     },
     "require-dev": {
         "mockery/mockery": ">=0.7.2"
