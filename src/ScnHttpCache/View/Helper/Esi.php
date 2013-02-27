@@ -144,12 +144,11 @@ class Esi extends AbstractHelper
             return "<esi:include src=\"$url\" onerror=\"continue\" />\n";
         }
 
+        // fallback to non-surrogate capability
         $uri = UriFactory::factory($url);
-
         $application = $this->getApplication($uri);
+        $application->run();
 
-        $response = $application->run();
-
-        return $response->getContent();
+        return $application->getResponse()->getContent();
     }
 }

@@ -87,6 +87,9 @@ class EsiTest extends \PHPUnit_Framework_TestCase
             ->andReturn(new Request());
         $application->shouldReceive('run')
             ->once()
+            ->andReturn($application);
+        $application->shouldReceive('getResponse')
+            ->once()
             ->andReturn($response);
         $this->viewHelper->setApplication($application);
         $response = $this->viewHelper->doEsi('http://test.local/test');
