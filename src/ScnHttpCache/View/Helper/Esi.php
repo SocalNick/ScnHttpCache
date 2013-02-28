@@ -4,6 +4,7 @@ namespace ScnHttpCache\View\Helper;
 
 use ScnHttpCache\Service\EsiApplicationConfigProviderInterface;
 use ScnHttpCache\View\Exception as ViewException;
+use Zend\Http\Response;
 use Zend\Mvc\Application;
 use Zend\Mvc\MvcEvent;
 use Zend\Stdlib\Parameters;
@@ -19,6 +20,11 @@ class Esi extends AbstractHelper
     protected $surrogateCapability = false;
 
     /**
+     * @var Response
+     */
+    protected $response;
+
+    /**
      * @var EsiApplicationConfigProviderInterface
      */
     protected $esiApplicationConfigProvider;
@@ -27,6 +33,11 @@ class Esi extends AbstractHelper
      * @var Application
      */
     protected $application;
+
+    /**
+     * @var boolean
+     */
+    protected $surrogateControlHeaderAdded = false;
 
     /**
      * This tells the view helper if the client understands surrogate capability
@@ -47,6 +58,27 @@ class Esi extends AbstractHelper
     public function getSurrogateCapability()
     {
         return $this->surrogateCapability;
+    }
+
+    /**
+     * Set the response object
+     *
+     * @param  Response $response
+     * @return Esi
+     */
+    public function setResponse(Response $response)
+    {
+        $this->response = $response;
+
+        return $this;
+    }
+
+    /**
+     * @return \Zend\Http\Response
+     */
+    public function getResponse()
+    {
+        return $this->response;
     }
 
     /**
@@ -141,6 +173,13 @@ class Esi extends AbstractHelper
     public function doEsi($url)
     {
         if ($this->getSurrogateCapability()) {
+
+            if ($this->getResponse() !== null && !$this->surrogateControlHeaderAdded) {
+                $headers = $this->getResponse()->getHeaders();
+                $headers->addHeaderLine('Surrogate-Control', 'ESI/1.0');
+                $this->surrogateControlHeaderAdded = true;
+            }
+
             return "<esi:include src=\"$url\" onerror=\"continue\" />\n";
         }
 
