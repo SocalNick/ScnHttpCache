@@ -93,7 +93,11 @@ class EsiTest extends \PHPUnit_Framework_TestCase
 
         $this->viewHelper->setSurrogateCapability(true);
         $this->viewHelper->setResponse($responseMock);
+
         $this->viewHelper->doEsi('test');
+
+        // Surrogate-control header should not be added with second call
+        $this->viewHelper->doEsi('test2');
     }
 
     public function testDoEsiWithoutSurrogateCapability()

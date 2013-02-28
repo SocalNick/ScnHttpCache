@@ -35,6 +35,11 @@ class Esi extends AbstractHelper
     protected $application;
 
     /**
+     * @var boolean
+     */
+    protected $surrogateControlHeaderAdded = false;
+
+    /**
      * This tells the view helper if the client understands surrogate capability
      *
      * @param  boolean $surrogateCapability
@@ -169,9 +174,10 @@ class Esi extends AbstractHelper
     {
         if ($this->getSurrogateCapability()) {
 
-            if ($this->getResponse() !== null) {
+            if ($this->getResponse() !== null && !$this->surrogateControlHeaderAdded) {
                 $headers = $this->getResponse()->getHeaders();
                 $headers->addHeaderLine('Surrogate-Control', 'ESI/1.0');
+                $this->surrogateControlHeaderAdded = true;
             }
 
             return "<esi:include src=\"$url\" onerror=\"continue\" />\n";
