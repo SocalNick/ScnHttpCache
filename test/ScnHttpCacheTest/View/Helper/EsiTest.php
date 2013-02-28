@@ -77,6 +77,61 @@ class EsiTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('<esi:include src="test" onerror="continue" />' . "\n", $this->viewHelper->doEsi('test'));
     }
 
+    public function testDoEsiWithSurrogateCapabilityAddsSurrogateControlHeader()
+    {
+        $headersMock = Mockery::mock('Zend\Http\Headers')
+            ->shouldReceive('addHeaderLine')
+            ->once()
+            ->with('Surrogate-Control', 'ESI/1.0')
+            ->getMock();
+
+        $headersMock->shouldReceive('has')
+            ->once()
+            ->with('Surrogate-Control')
+            ->andReturn(false);
+
+        $headersMock->shouldReceive('has')
+            ->once()
+            ->with('Surrogate-Control')
+            ->andReturn(true);
+
+
+        $responseMock = Mockery::mock('Zend\Http\Response')
+            ->shouldReceive('getHeaders')
+            ->twice()
+            ->andReturn($headersMock)
+            ->getMock();
+
+        $this->viewHelper->setSurrogateCapability(true);
+        $this->viewHelper->setResponse($responseMock);
+
+        $this->viewHelper->doEsi('test');
+
+        // Surrogate-control header should not be added with second call
+        $this->viewHelper->doEsi('test2');
+    }
+
+    public function testDoEsiWithSurrogateCapabilityDoesNotAddSurrogateControlWhenPresent()
+    {
+        $headersMock = Mockery::mock('Zend\Http\Headers')
+            ->shouldReceive('has')
+            ->once()
+            ->with('Surrogate-Control')
+            ->andReturn(true)
+            ->getMock();
+
+        $responseMock = Mockery::mock('Zend\Http\Response')
+            ->shouldReceive('getHeaders')
+            ->once()
+            ->andReturn($headersMock)
+            ->getMock();
+
+        $this->viewHelper->setSurrogateCapability(true);
+        $this->viewHelper->setResponse($responseMock);
+
+        $this->viewHelper->doEsi('test');
+    }
+
     public function testDoEsiWithoutSurrogateCapability()
     {
         $response = new Response();

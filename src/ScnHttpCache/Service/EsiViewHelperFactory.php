@@ -16,6 +16,7 @@ class EsiViewHelperFactory implements FactoryInterface
 
         $viewHelper = new Esi();
         $viewHelper->setEsiApplicationConfigProvider($esiApplicationConfigProvider);
+        $viewHelper->setResponse($serviceLocator->get('Response'));
 
         $request = $serviceLocator->get('Request');
         $headers = $request->getHeaders();
