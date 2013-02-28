@@ -169,8 +169,10 @@ class Esi extends AbstractHelper
     {
         if ($this->getSurrogateCapability()) {
 
-            $headers = $this->getResponse()->getHeaders();
-            $headers->addHeaderLine('Surrogate-Control', 'ESI/1.0');
+            if ($this->getResponse() !== null) {
+                $headers = $this->getResponse()->getHeaders();
+                $headers->addHeaderLine('Surrogate-Control', 'ESI/1.0');
+            }
 
             return "<esi:include src=\"$url\" onerror=\"continue\" />\n";
         }
