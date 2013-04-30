@@ -147,4 +147,23 @@ class EsiTest extends \PHPUnit_Framework_TestCase
         $response = $this->viewHelper->doEsi('http://test.local/test');
         $this->assertEquals('test', $response);
     }
+    
+    public function testDoEsiWithoutSurrogateCapabilityUsingRelativeUrl()
+    {
+        $response = new Response();
+        $response->setContent('test');
+        $application = Mockery::mock('Zend\Mvc\Application');
+        $application->shouldReceive('getRequest')
+            ->once()
+            ->andReturn(new Request());
+        $application->shouldReceive('run')
+            ->once()
+            ->andReturn($application);
+        $application->shouldReceive('getResponse')
+            ->once()
+            ->andReturn($response);
+        $this->viewHelper->setApplication($application);
+        $response = $this->viewHelper->doEsi('/test');
+        $this->assertEquals('test', $response);
+    }
 }
