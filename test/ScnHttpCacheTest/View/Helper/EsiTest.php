@@ -150,7 +150,7 @@ class EsiTest extends \PHPUnit_Framework_TestCase
         $response = $this->viewHelper->doEsi('http://test.local/test');
         $this->assertEquals('test', $response);
     }
-    
+
     public function testDoEsiWithoutSurrogateCapabilityUsingRelativeUrl()
     {
         $response = new Response();

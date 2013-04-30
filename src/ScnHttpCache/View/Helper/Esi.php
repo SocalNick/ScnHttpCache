@@ -180,7 +180,7 @@ class Esi extends AbstractHelper
         }
 
         // fallback to non-surrogate capability
-        $uri = UriFactory::factory($url);
+        $uri = UriFactory::factory($url, 'http');
         $application = $this->getApplication($uri);
         $application->run();
 
